@@ -1,3 +1,13 @@
 https://forums.raspberrypi.com/viewtopic.php?t=250041
 	refers to 
 		https://github.com/IanHarvey/bluepy
+		docs https://ianharvey.github.io/bluepy-doc/index.html
+
+
+link to calculating distance with rrsi
+https://medium.com/beingcoders/convert-rssi-value-of-the-ble-bluetooth-low-energy-beacons-to-meters-63259f307283
+
+BT devices like phones, tv etc
+https://geektechstuff.com/2020/06/01/python-and-bluetooth-part-1-scanning-for-devices-and-services-python/
+
+pybluez doc https://pybluez.readthedocs.io/en/latest/
