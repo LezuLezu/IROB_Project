@@ -11,3 +11,9 @@ BT devices like phones, tv etc
 https://geektechstuff.com/2020/06/01/python-and-bluetooth-part-1-scanning-for-devices-and-services-python/
 
 pybluez doc https://pybluez.readthedocs.io/en/latest/
+
+bt connection issues 
+https://forums.raspberrypi.com/viewtopic.php?t=284149
+
+bt controller mapping 
+https://raspberry-valley.azurewebsites.net/Map-Bluetooth-Controller-using-Python/
