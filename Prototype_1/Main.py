@@ -10,10 +10,13 @@ from evdev import InputDevice, categorize, ecodes
 gamepad = InputDevice('/dev/input/event0')
 
 # Motor vars
-dcMotorA1 = 35
-dcMotorB1 = 37
-dcMotorA2 = 29
-dcMotorB2 = 31
+# A motor
+dcMotor_A1A = 35
+dcMotor_A1B = 37
+# B Motor
+dcMotor_B1B = 29
+dcMotor_B1A = 31
+
 
 # Button code variables (switch pro controller)
 aBtn = 305
@@ -34,49 +37,51 @@ rBtn = 309
 # motor init
 def motorInit():
     gpio.setmode(gpio.BOARD)
-    gpio.setup(dcMotorA1, gpio.OUT)
-    gpio.setup(dcMotorB1, gpio.OUT)
-    gpio.setup(dcMotorA2, gpio.OUT)
-    gpio.setup(dcMotorB2, gpio.OUT)
+    gpio.setup(dcMotor_A1A, gpio.OUT)
+    gpio.setup(dcMotor_A1B, gpio.OUT)
+    gpio.setup(dcMotor_B1B, gpio.OUT)
+    gpio.setup(dcMotor_B1A, gpio.OUT)
 
 # Motor forward
 def motorForward(sec):
     motorInit()
     print("forward")
-    gpio.output(dcMotorA1, False)
-    gpio.output(dcMotorB1, True)
-    gpio.output(dcMotorA2, False)
-    gpio.output(dcMotorB2, True)
+    gpio.output(dcMotor_A1A, False)
+    gpio.output(dcMotor_A1B, True)
+    gpio.output(dcMotor_B1B, False)
+    gpio.output(dcMotor_B1A, True)
     time.sleep(sec)
     gpio.cleanup()
+
 # Motor reverse
 def MotorReverse(sec):
     motorInit()
     print("reverse")
-    gpio.output(dcMotorA1, True)
-    gpio.output(dcMotorB1, False)
-    gpio.output(dcMotorA2, True)
-    gpio.output(dcMotorB2, False)
+    gpio.output(dcMotor_A1A, True)
+    gpio.output(dcMotor_A1B, False)
+    gpio.output(dcMotor_B1B, True)
+    gpio.output(dcMotor_B1A, False)
     time.sleep(sec)
     gpio.cleanup()
+
 # Motor right
 def motorRight(sec):
     motorInit()
     print("right")
-    gpio.output(dcMotorA1, False)
-    gpio.output(dcMotorB1, True)
-    gpio.output(dcMotorA2, True)
-    gpio.output(dcMotorB2, False)
+    gpio.output(dcMotor_A1A, False)
+    gpio.output(dcMotor_A1B, True)
+    gpio.output(dcMotor_B1B, True)
+    gpio.output(dcMotor_B1A, False)
     time.sleep(sec)
     gpio.cleanup()
 # Motor left
 def motorLeft(sec):
     motorInit()
     print("left")
-    gpio.output(dcMotorA1, True)
-    gpio.output(dcMotorB1, False)
-    gpio.output(dcMotorA2, False)
-    gpio.output(dcMotorB2, True)
+    gpio.output(dcMotor_A1A, True)
+    gpio.output(dcMotor_A1B, False)
+    gpio.output(dcMotor_B1B, False)
+    gpio.output(dcMotor_B1A, True)
     time.sleep(sec)
     gpio.cleanup()
 
