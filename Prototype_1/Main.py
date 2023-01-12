@@ -88,9 +88,12 @@ def motorLeft(sec):
 if __name__ == '__main__':
     try:
         while True:
+            print("try a control button")
             for event in gamepad.read_loop():
                 if event.type == ecodes.EV_KEY:
+                    print("type test")
                     if event.value == 1:
+                        print("button pressed")
                         if event.code == aBtn:
                             print("A")
                             motorForward(1)
