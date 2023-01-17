@@ -41,36 +41,36 @@ def motorInit():
     gpio.setup(dcMotor_B1B, gpio.OUT)
     gpio.setup(dcMotor_B1A, gpio.OUT)
 
-# Motor forward
-def motorForward(sec):
-    motorInit()
-    print("forward")
-# Motor Right
-    gpio.output(dcMotor_A1A, True)
-    gpio.output(dcMotor_A1B, False)
 # Motor Left
-    gpio.output(dcMotor_B1A, True)
-    gpio.output(dcMotor_B1B, False)
-    time.sleep(sec)
-    gpio.cleanup()
-
-# Motor reverse
-def MotorReverse(sec):
-    motorInit()
-    print("reverse")
-# Motor Right
-    gpio.output(dcMotor_A1A, False)
-    gpio.output(dcMotor_A1B, True)
-# Motor Left
-    gpio.output(dcMotor_B1A, False)
-    gpio.output(dcMotor_B1B, True)
-    time.sleep(sec)
-    gpio.cleanup()
-
-# Motor right
 def motorLeft(sec):
     motorInit()
-    print("right")
+    print("Left")
+# Motor Right
+    gpio.output(dcMotor_A1A, True)
+    gpio.output(dcMotor_A1B, False)
+# Motor Left
+    gpio.output(dcMotor_B1A, True)
+    gpio.output(dcMotor_B1B, False)
+    time.sleep(sec)
+    gpio.cleanup()
+
+# Motor Right
+def motorRight(sec):
+    motorInit()
+    print("Right")
+# Motor Right
+    gpio.output(dcMotor_A1A, False)
+    gpio.output(dcMotor_A1B, True)
+# Motor Left
+    gpio.output(dcMotor_B1A, False)
+    gpio.output(dcMotor_B1B, True)
+    time.sleep(sec)
+    gpio.cleanup()
+
+# Motor Reverse
+def motorReverse(sec):
+    motorInit()
+    print("Reverse")
 # Motor Right
     gpio.output(dcMotor_A1A, True)
     gpio.output(dcMotor_A1B, False)
@@ -80,10 +80,10 @@ def motorLeft(sec):
     time.sleep(sec)
     gpio.cleanup()
 
-# Motor left
-def motorRight(sec):
+# Motor Forward
+def motorForward(sec):
     motorInit()
-    print("left")
+    print("Forward")
 # Motor Right
     gpio.output(dcMotor_A1A, False)
     gpio.output(dcMotor_A1B, True)
@@ -92,6 +92,7 @@ def motorRight(sec):
     gpio.output(dcMotor_B1B, False)
     time.sleep(sec)
     gpio.cleanup()
+
 
 if __name__ == '__main__':
     try:
@@ -106,7 +107,7 @@ if __name__ == '__main__':
                             motorRight(1)
                         elif event.code == bBtn:
                             print("B")
-                            MotorReverse(1)
+                            motorReverse(1)
                         elif event.code == yBtn:
                             print("Y")
                             motorLeft(1)
@@ -115,7 +116,7 @@ if __name__ == '__main__':
                             motorForward(1)
                         elif event.code == hmBtn:
                             # Stop motors
-                            print("home")
+                            print("Stop")
                             gpio.cleanup()
                             
     except KeyboardInterrupt:
