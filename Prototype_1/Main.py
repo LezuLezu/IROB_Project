@@ -68,7 +68,7 @@ def MotorReverse(sec):
     gpio.cleanup()
 
 # Motor right
-def motorRight(sec):
+def motorLeft(sec):
     motorInit()
     print("right")
 # Motor Right
@@ -81,7 +81,7 @@ def motorRight(sec):
     gpio.cleanup()
 
 # Motor left
-def motorLeft(sec):
+def motorRight(sec):
     motorInit()
     print("left")
 # Motor Right
