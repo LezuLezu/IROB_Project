@@ -28,28 +28,33 @@ from langdetect import detect
 # print(detect(s))
 
 #SPEECH TO TEXT WEBCAM MIC
-r = sr.Recognizer()
-with sr.Microphone() as source:
-    r.adjust_for_ambient_noise(source)
-    print("Say something!")
-    # audio = r.listen(source)
-    audio = r.listen(source, timeout=5, phrase_time_limit=20)
+# r = sr.Recognizer()
+# with sr.Microphone() as source:
+#     r.adjust_for_ambient_noise(source)
+#     print("Say something!")
+#     # audio = r.listen(source)
+#     audio = r.listen(source, timeout=5, phrase_time_limit=20)
 
-a = r.recognize_google(audio)
-print(a)
-translator = Translator()
-translation = translator.translate(a, "dutch")
-print(translation)
-print(detect(a))
+# a = r.recognize_google(audio)
+# print(a)
+# translator = Translator()
+# translation = translator.translate(a, "dutch")
+# print(translation)
+# print(detect(a))
 
 
 
 #DETECT TEXT LANGUAGE
-# text = "hola como estas"
-# translator = Translator()
-# result = translator.translate(text, "dutch")
+text = "hello how are you"
+translator = Translator()
+result = translator.translate(text, "dutch")
+print(result)
 
-# print(result)
-# print(detect(text))
+detectedLang = detect(text)
+print(detectedLang)
+
+resText = "goed en met jou"
+resResult = translator.translate(resText, detectedLang)
+print(resResult)
 
     
