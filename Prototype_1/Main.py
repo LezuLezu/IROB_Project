@@ -5,9 +5,27 @@ import RPi.GPIO as gpio
 import time
     # Controller readings
 from evdev import InputDevice, categorize, ecodes
+    # Translator
+from python_translator import Translator
+    # Language detector
+from langdetect import detect
+    # Speech recognition
+import speech_recognition as sr
 
-#creates object 'gamepad' to store the data
+
+# Declerations
+    #set board mode to GPIO.BOARD
+gpio.setmode(gpio.BOARD)
+    #creates object 'gamepad' to store the data
 gamepad = InputDevice('/dev/input/event0')
+    # Button 
+BUTTON1 = 7
+GPIO.setup(BUTTON1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    # LED
+LED = 11
+GPIO.setup(LED, GPIO.OUT)
+GPIP.output(LED, GPIO.LOW)
+
 
 # Motor vars
 # A motor -> Left
@@ -35,7 +53,7 @@ rBtn = 309
 
 # motor init
 def motorInit():
-    gpio.setmode(gpio.BOARD)
+    # gpio.setmode(gpio.BOARD)
     gpio.setup(dcMotor_A1A, gpio.OUT)
     gpio.setup(dcMotor_A1B, gpio.OUT)
     gpio.setup(dcMotor_B1B, gpio.OUT)
@@ -93,32 +111,83 @@ def motorForward(sec):
     time.sleep(sec)
     gpio.cleanup()
 
+#INPUT SPEECH VIA WEBCAM MIC 
+def speechToText():
+    print("speechToText")
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Say something when the light is on")
+        GPIO.output(LED, GPIO.HIGH)
+        # audio = r.listen(source)
+        audio = r.listen(source, timeout=5, phrase_time_limit=20)
+    GPIO.output(LED, GPIO.LOW)
+    return audio
+
+#RECOGNIZE SPEECH CONVERT TO TEXT
+def recognizeSpeech(audio):
+    r = sr.Recognizer()
+    speech = r.recognize_google(audio)
+    print(speech)
+    return speech
+
+#TRANSLATE TEXT TO DUTCH
+def translateText(speech):    
+    translator = Translator()
+    translationText = translator.translate(speech, "dutch")
+    print(translationText) # -> to display for dutch
+    detectedLang = detect(speech)
+    print(detectedLang)
+    return detectedLang
+
+#TRANSLATE DUTCH BACK TO ORIGINAL LANGUAGE
+def translateOriginLang(detectedLang):
+    print("translateOriginLang")
+    print(detectedLang)
+    audio = speechToText()
+
+    r = sr.Recognizer()
+    speech = r.recognize_google(audio, language="nl")
+    print(speech)
+
+    translator = Translator()
+    originLangText = translator.translate(speech, detectedLang)
+    print(originLangText) #-> to display for foreign language
+
+def main():
+    while True:
+        if GPIO.input(BUTTON1) == False:
+            print("button1 pressed")        
+            audio = speechToText()
+            speech = recognizeSpeech(audio)
+            detectedLang = translateText(speech)
+            translateOriginLang(detectedLang)
+            time.sleep(0.3)
+
+        print("try a control button")
+        for event in gamepad.read_loop():
+            if event.type == ecodes.EV_KEY:
+                if event.value == 1:
+                    print("button pressed")
+                    if event.code == aBtn:
+                        print("A")
+                        motorRight(1)
+                    elif event.code == bBtn:
+                        print("B")
+                        motorReverse(1)
+                    elif event.code == yBtn:
+                        print("Y")
+                        motorLeft(1)
+                    elif event.code == xBtn:
+                        print("X")
+                        motorForward(1)
+                    elif event.code == hmBtn:
+                        # Stop motors
+                        print("Stop")
+                        gpio.cleanup()
 
 if __name__ == '__main__':
     try:
-        while True:
-            print("try a control button")
-            for event in gamepad.read_loop():
-                if event.type == ecodes.EV_KEY:
-                    if event.value == 1:
-                        print("button pressed")
-                        if event.code == aBtn:
-                            print("A")
-                            motorRight(1)
-                        elif event.code == bBtn:
-                            print("B")
-                            motorReverse(1)
-                        elif event.code == yBtn:
-                            print("Y")
-                            motorLeft(1)
-                        elif event.code == xBtn:
-                            print("X")
-                            motorForward(1)
-                        elif event.code == hmBtn:
-                            # Stop motors
-                            print("Stop")
-                            gpio.cleanup()
-                            
+        main()                            
     except KeyboardInterrupt:
         print("Keyboard interrupt")
         gpio.cleanup()
