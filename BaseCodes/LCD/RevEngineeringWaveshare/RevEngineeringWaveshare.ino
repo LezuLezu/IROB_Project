@@ -31,7 +31,7 @@ void loop() {
 bool readSerial(char* serialInput){
   if(Serial.available()){  
     String serialRead;
-    delay(50);
+//    delay(50);
     serialRead = Serial.readString();
     if(serialRead != " "){
       Serial.println("in serialRead");
