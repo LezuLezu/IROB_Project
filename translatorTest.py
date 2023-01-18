@@ -45,15 +45,15 @@ from langdetect import detect
 
 
 #DETECT TEXT LANGUAGE
-text = "hello how are you"
+text = "hoe gaat het"
 translator = Translator()
-result = translator.translate(text, "dutch")
+result = translator.translate(text, "en")
 print(result)
 
 detectedLang = detect(text)
 print(detectedLang)
 
-resText = "goed en met jou"
+resText = "i am fine"
 resResult = translator.translate(resText, detectedLang)
 print(resResult)
 
