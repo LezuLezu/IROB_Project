@@ -15,7 +15,7 @@ GPIO.setmode(GPIO.BOARD)
 from time import sleep
 
 import serial
-port = serial.Serial("/dev/ttyAMA0", baudrate=11520, timeout=3.0)
+# arduino = serial.Serial("/dev/ttyAMA0", baudrate=115200, timeout=1)
 
 #DECLERATIONS
 BUTTON1 = 7
@@ -64,9 +64,9 @@ def recognizeSpeech(audio):
 def translateText(speech):    
     translator = Translator()
     translationText = translator.translate(speech, "dutch")
-    print(dir(translationText))
+    # print(dir(translationText))
     print(translationText.new_text)
-    print(type(translationText.new_text))
+    # print(type(translationText.new_text))
     toArduino(translationText.new_text)
     # sleep(3)
     detectedLang = detect(speech)
@@ -92,11 +92,30 @@ def translateOriginLang(detectedLang):
 
 
 def toArduino(textToSend):
-    print("toArduino")
-    print(str(textToSend))
-    newText = "<" + str(textToSend) + ">\n\r"
-    print(newText)
-    port.write(newText.encode())
+    with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as arduino:
+        sleep(0.1)
+        if arduino.isOpen():
+            print("{} connected".format(arduino.port))
+            try:
+                while True:
+                    cmd = textToSend + "\n\r"
+                    print(cmd)
+                    arduino.write(cmd.encode())
+                    while arduino.inWaiting() == 0: pass
+                    if arduino.inWaiting() > 0:
+                        received = arduino.readline()
+                        print(received)
+                        arduino.flushInput()
+                        arduino.close()
+            except KeyboardInterrupt:
+                print("KeyboardInterrupt")
+                arduino.close()
+
+    # print("toArduino")
+    # print(str(textToSend))
+    # newText = str(textToSend) + "n\r"
+    # print(newText)
+    # port.write(newText.encode())
 
 
 #MAIN

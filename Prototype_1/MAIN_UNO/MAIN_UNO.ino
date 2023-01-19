@@ -22,6 +22,7 @@ void loop(){
         LCD_Clear(WHITE);
         GUI_DisString_EN(50, 50, serialInput, &Font20, WHITE, BLACK);  
         booleanReceived = false;
+        Serial.println("Input processed");
 //        Serial.println(serialInput);
     }    
 }
@@ -30,7 +31,7 @@ bool readSerial(char* serialInput){
   if(Serial.available()){  
     String serialRead;
 //    delay(50);
-    serialRead = Serial.readString();
+    serialRead = Serial.readStringUntil("\n\r");
     if(serialRead != " "){
 //      Serial.println("in serialRead");
       serialRead.trim();   

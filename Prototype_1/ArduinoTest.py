@@ -11,6 +11,8 @@ from python_translator import Translator
 from langdetect import detect
     # Speech recognition
 import speech_recognition as sr
+    #serial communication
+import serial
 
 
 # Declerations
@@ -23,6 +25,8 @@ gamepad = InputDevice('/dev/input/event0')
 BUTTON1 = 7
     # LED
 LED = 11
+    # serial
+# port = serial.Serial("/dev/ttyAMA0", baudrate=11520, timeout=3.0)
 
 # Motor vars
 # A motor -> Left
@@ -139,6 +143,8 @@ def translateText(speech):
     translator = Translator()
     translationText = translator.translate(speech, "dutch")
     print(translationText) # -> to display for dutch
+    toArduino(translationText.text)
+    time.sleep(2)
     detectedLang = detect(speech)
     print(detectedLang)
     return detectedLang
@@ -156,6 +162,8 @@ def translateOriginLang(detectedLang):
     translator = Translator()
     originLangText = translator.translate(speech, detectedLang)
     print(originLangText) #-> to display for foreign language
+    toArduino(originLangText.text)
+    time.sleep(2)
 
 def listenToButtonInput(listening):
     while listening:
@@ -168,6 +176,17 @@ def listenToButtonInput(listening):
             time.sleep(0.3)
             listening = False   
 
+def toArduino(textToSend):
+    print("toArduino")
+    print(textToSend)
+    # arduino = serial.Serial('/dev/ttyACM0', 9600)
+    # arduino.write(textToSend.encode())
+    # arduino.close()
+    newText = "<" + textToSend + ">\n\r"
+    port.write(newText.encode())
+
+
+
 def main():
     try:
         while True:  
@@ -179,7 +198,7 @@ def main():
                         print("button pressed")
                         if event.code == plsBtn:
                             print("Plus")
-                            listenToButtonInput(True)
+                            # listenToButtonInput(True)
                         if event.code == aBtn:
                             print("A")
                             motorRight(1)
