@@ -168,25 +168,27 @@ def translateOriginLang(detectedLang):
 def listenToButtonInput(listening):
     while listening:
         if gpio.input(BUTTON1) == True:
-            print("button1 pressed")        
-            audio = speechToText()
-            speech = recognizeSpeech(audio)
-            detectedLang = translateText(speech)
-            translateOriginLang(detectedLang)
+            print("button1 pressed") 
+            toArduino()       
+            # audio = speechToText()
+            # speech = recognizeSpeech(audio)
+            # detectedLang = translateText(speech)
+            # translateOriginLang(detectedLang)
             time.sleep(0.3)
             listening = False   
 
 def toArduino(textToSend):
-    print("toArduino")
-    print(textToSend)
-    # arduino = serial.Serial('/dev/ttyACM0', 9600)
-    # arduino.write(textToSend.encode())
-    # arduino.close()
-    newText = "<" + textToSend + ">\n\r"
-    port.write(newText.encode())
+    with serial.Serial("COM3", baudrate=115200, timeout=1) as arduino:
+        print("toArduino")
+        audio = speechToText()
+        speech = recognizeSpeech(audio)
+        arduino.write(str.encode(speech))
+        detectedLang = translateText(speech)
+        translateOriginLang(detectedLang)
+        arduino.write(str.encode(detectedLang))
 
 
-
+        
 def main():
     try:
         while True:  
