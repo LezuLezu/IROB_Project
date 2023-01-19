@@ -177,7 +177,7 @@ def listenToButtonInput(listening):
             time.sleep(0.3)
             listening = False   
 
-def toArduino(textToSend):
+def toArduino():
     with serial.Serial("COM3", baudrate=115200, timeout=1) as arduino:
         print("toArduino")
         audio = speechToText()
