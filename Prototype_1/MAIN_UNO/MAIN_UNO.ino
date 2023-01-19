@@ -7,10 +7,7 @@ const byte numChars = 192;
 
 char serialInput[numChars];
 
-//Testing
-char receivedChars[numChars];
 
-boolean newData = false;
 
 void setup() {
   System_Init();
@@ -21,54 +18,30 @@ void setup() {
 
 void loop(){
     booleanReceived = readSerial(serialInput); 
-    if(newData == true && booleanReceived == true){
+    if(booleanReceived == true){
         LCD_Clear(WHITE);
         GUI_DisString_EN(50, 50, serialInput, &Font20, WHITE, BLACK);  
-        newData = false; 
         booleanReceived = false;
-        Serial.println(serialInput);
+//        Serial.println(serialInput);
     }    
 }
 
 bool readSerial(char* serialInput){
-  recvWithStartEndMarkers();
-  strcpy(serialInput, receivedChars);
-  if(serialInput != " "){return true;}
-}
-
-void recvWithStartEndMarkers(){
-  static boolean recInProgress = false;
-  static byte ndx = 0;
-  char startMarker = '<';
-  char endMarker = '>';
-  char rc;
-  while(Serial.available() > 0 && newData == false){
-    rc = Serial.read();
-    Serial.flush();
-    if(recInProgress == true){
-      if(rc != endMarker){
-        receivedChars[ndx] = rc;
-        ndx ++;
-        if(ndx >= numChars){
-          ndx = numChars -1;
-        }
-      }
-      else{
-        receivedChars[ndx] == '\0';
-        recInProgress = false;
-        ndx = 0;
-        newData = true;
-      }
+  if(Serial.available()){  
+    String serialRead;
+//    delay(50);
+    serialRead = Serial.readString();
+    if(serialRead != " "){
+//      Serial.println("in serialRead");
+      serialRead.trim();   
+      Serial.flush();
+//      Serial.println(serialRead);
+      strcpy(serialInput, serialRead.c_str());
+      return true;
+    }else{
+      return false;
     }
-    else if (rc == startMarker){
-      recInProgress = true;
-    }
-  }
-}
-
-void showData(){
-  if(newData = true){
-    Serial.println(receivedChars);
-    newData = false;
+  }else{
+    return false;
   }
 }
