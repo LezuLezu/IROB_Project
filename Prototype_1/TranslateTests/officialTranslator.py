@@ -14,6 +14,9 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BOARD)
 from time import sleep
 
+import serial
+port = serial.Serial("/dev/ttyAMA0", baudrate=11520, timeout=3.0)
+
 #DECLERATIONS
 BUTTON1 = 7
 LED = 11
@@ -27,7 +30,7 @@ def main():
 
     #BUTTON PRESSED
     while True:
-        if GPIO.input(BUTTON1) == False:
+        if GPIO.input(BUTTON1) == True:
             print("button1 pressed")        
             audio = speechToText()
             speech = recognizeSpeech(audio)
@@ -61,7 +64,11 @@ def recognizeSpeech(audio):
 def translateText(speech):    
     translator = Translator()
     translationText = translator.translate(speech, "dutch")
-    print(translationText)
+    print(dir(translationText))
+    print(translationText.new_text)
+    print(type(translationText.new_text))
+    toArduino(translationText.new_text)
+    # sleep(3)
     detectedLang = detect(speech)
     print(detectedLang)
     return detectedLang
@@ -80,6 +87,16 @@ def translateOriginLang(detectedLang):
     translator = Translator()
     originLangText = translator.translate(speech, detectedLang)
     print(originLangText)
+    toArduino(originLangText.new_text())
+    # sleep(3)
+
+
+def toArduino(textToSend):
+    print("toArduino")
+    print(str(textToSend))
+    newText = "<" + str(textToSend) + ">\n\r"
+    print(newText)
+    port.write(newText.encode())
 
 
 #MAIN
