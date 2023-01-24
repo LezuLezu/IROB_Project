@@ -1,3 +1,5 @@
+# Third file to tinker making corners better
+
 # ------ IMPORTS ------ #
     #   GPIO for pi pin controls for hardware
 import RPi.GPIO as gpio
@@ -44,6 +46,13 @@ dcMotor_A1B = 37
 dcMotor_B1B = 29
 dcMotor_B1A = 31
 
+#   Set pwm for speeds
+pwm_pin = 16
+# Start pwm
+gpio.setup(16, gpio.OUT)
+pwm = gpio.PWM(16,100)
+pwm.start(0)
+
 #   Button code variables (switch pro controller)
 aBtn = 305
 bBtn = 304
@@ -79,15 +88,19 @@ def gpioInnit():
     gpio.setup(dcMotor_A1B, gpio.OUT)
     gpio.setup(dcMotor_B1B, gpio.OUT)
     gpio.setup(dcMotor_B1A, gpio.OUT)
-    
+    # Turn of engines
     gpio.output(dcMotor_A1A, gpio.LOW)
     gpio.output(dcMotor_A1B, gpio.LOW)
     gpio.output(dcMotor_B1B, gpio.LOW)
     gpio.output(dcMotor_B1A, gpio.LOW)
 
+
+
+
 # ------ MOTOR DIRECTIONS ------ #
 #   Motor Left
 def motorLeft(sec):
+    pwm.ChangeDutyCycle(5)
     print("Left")
 #   Motor Right
     gpio.output(dcMotor_A1A, True)
@@ -99,6 +112,7 @@ def motorLeft(sec):
     
 #   Motor Right
 def motorRight(sec):
+    pwm.ChangeDutyCycle(5)
     print("Right")
 #   Motor Right
     gpio.output(dcMotor_A1A, False)
@@ -110,6 +124,7 @@ def motorRight(sec):
 
 #   Motor Reverse
 def motorReverse(sec):
+    pwm.ChangeDutyCycle(20)
     print("Reverse")
 #   Motor Right
     gpio.output(dcMotor_A1A, True)
@@ -121,6 +136,7 @@ def motorReverse(sec):
 
 #   Motor Forward
 def motorForward(sec):
+    pwm.ChangeDutyCycle(20)
     print("Forward")
 #   Motor Right
     gpio.output(dcMotor_A1A, False)
