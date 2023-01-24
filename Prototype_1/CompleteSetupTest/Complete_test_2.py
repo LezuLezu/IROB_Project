@@ -1,0 +1,246 @@
+# ------ IMPORTS ------ #
+    #   GPIO for pi pin controls for hardware
+import RPi.GPIO as gpio
+    #   Serial
+import serial
+    #   time for delays
+import time
+    #   controller event readings
+from evdev import InputDevice, categorize, ecodes
+    #   python translation
+from python_translator import Translator
+    #   Language detetcion
+from langdetect import detect
+    #   Speech recognitions
+import speech_recognition as sr
+
+# ------ OBJECT DECLERATIONS ------ #
+    # Ignore GPIO warnings (board set in innit)
+gpio.setwarnings(False)
+gpio.setmode(gpio.BOARD)
+
+#   Gamepad object
+gamepad = InputDevice('/dev/input/event0')
+#   Recongizer object
+r = sr.Recognizer()
+#   translator object
+translator = Translator()
+
+# ------ VARIABLE DECLERATIONS ------ #
+# Language Target 
+targetLanguage = "nl"
+#   LED
+LED = 11
+#   Button
+BUTTON = 7
+
+#   Motors
+#   A motor -> Left
+dcMotor_A1A = 35
+dcMotor_A1B = 37
+#   B Motor -> Right
+dcMotor_B1B = 29
+dcMotor_B1A = 31
+
+#   Button code variables (switch pro controller)
+aBtn = 305
+bBtn = 304
+yBtn = 306
+xBtn = 307
+
+plsBtn = 313        # plus button
+mnBtn = 312         # minus button
+scnBtn = 317        # screenshot button
+hmBtn = 316         # home button
+
+zlBtn = 310
+lBtn = 308
+zrBtn = 311
+rBtn = 309
+
+# ------ GPIO INNIT ------ #
+def gpioInnit():
+    # Set board
+    gpio.setmode(gpio.BOARD)
+    # Set led
+    gpio.setup(LED, gpio.OUT)
+    gpio.output(LED, gpio.LOW)
+    # Set button
+    gpio.setup(BUTTON, gpio.IN, pull_up_down=gpio.PUD_UP)
+    # Set motor pins
+    gpio.setup(dcMotor_A1A, gpio.OUT)
+    gpio.setup(dcMotor_A1B, gpio.OUT)
+    gpio.setup(dcMotor_B1B, gpio.OUT)
+    gpio.setup(dcMotor_B1A, gpio.OUT)
+    
+    gpio.setup(dcMotor_A1A, gpio.LOW)
+    gpio.setup(dcMotor_A1B, gpio.LOW)
+    gpio.setup(dcMotor_B1B, gpio.LOW)
+    gpio.setup(dcMotor_B1A, gpio.LOW)
+
+# ------ MOTOR DIRECTIONS ------ #
+#   Motor Left
+def motorLeft(sec):
+    print("Left")
+#   Motor Right
+    gpio.output(dcMotor_A1A, True)
+    gpio.output(dcMotor_A1B, False)
+#   Motor Left
+    gpio.output(dcMotor_B1A, True)
+    gpio.output(dcMotor_B1B, False)
+    time.sleep(sec)
+    
+#   Motor Right
+def motorRight(sec):
+    print("Right")
+#   Motor Right
+    gpio.output(dcMotor_A1A, False)
+    gpio.output(dcMotor_A1B, True)
+#   Motor Left
+    gpio.output(dcMotor_B1A, False)
+    gpio.output(dcMotor_B1B, True)
+    time.sleep(sec)
+
+#   Motor Reverse
+def motorReverse(sec):
+    print("Reverse")
+#   Motor Right
+    gpio.output(dcMotor_A1A, True)
+    gpio.output(dcMotor_A1B, False)
+#   Motor Left
+    gpio.output(dcMotor_B1A, False)
+    gpio.output(dcMotor_B1B, True)
+    time.sleep(sec)
+
+#   Motor Forward
+def motorForward(sec):
+    print("Forward")
+#   Motor Right
+    gpio.output(dcMotor_A1A, False)
+    gpio.output(dcMotor_A1B, True)
+#   Motor Left
+    gpio.output(dcMotor_B1A, True)
+    gpio.output(dcMotor_B1B, False)
+    time.sleep(sec)
+
+# ------ Translation ------ #
+#   Get audio from microphone
+def listenToAudio(source):
+    print("Silence please, calibrating...")
+    r.adjust_for_ambient_noise(source, duration=2)
+    print("Say something when the light is on")
+    with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as arduino:
+        arduino.write(str.encode("Say something when the light is on"))
+        time.sleep(2.5)
+    arduino.close()
+    gpio.output(LED, gpio.HIGH)
+    audio = r.listen(source, timeout=5, phrase_time_limit=20)
+    gpio.output(LED, gpio.LOW)
+    return audio
+    
+
+#   Translate text to target language and detect origin langauge
+def translateText(speech):    
+    translationText = translator.translate(speech, targetLanguage)
+    translationText_String = translationText.new_text
+    print("Translation text: " + str(translationText.new_text))
+    detectedLang = detect(speech)
+    print("Detected language: " + str(detectedLang))
+    return translationText_String, detectedLang
+
+
+#   Translate target language to origin language
+def translateOriginLang(speech, detectedLang):
+    originLangText = translator.translate(speech, detectedLang)
+    translationText_String = originLangText.new_text
+    return translationText_String
+
+# Listen for hardware button
+def listenForButton(listening):
+    #   Show message on arduino to tell user to press button to start
+    with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as arduino:
+        arduino.write(str.encode("Press the button to start"))
+        time.sleep(2.5)
+    arduino.close()
+    #  Listen for button press
+    while listening:
+        if gpio.input(BUTTON) == False:
+            listening = False
+            print("Button to start pressed")
+            # Set up serial port to arduino and microphone source object
+            with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as arduino:
+                with sr.Microphone() as source:
+                    try:
+                        #   Listen to audio and display what user said on terminal
+                        audio = listenToAudio(source)
+                        speech = r.recognize_google(audio)
+                        print("You said "+speech+"\n")
+
+                        #  Translate text to target language and send to arduino for display
+                        translationText, detectedLang = translateText(speech)
+                        arduino.write(str.encode(translationText))   
+
+                        #   Listen to audio and display what user said on terminal
+                        audio = listenToAudio(source)
+                        speech = r.recognize_google(audio, language=targetLanguage)
+                        print("You said "+speech+"\n")
+
+                        #   Translate text to detected language and send to arduino for display
+                        originLangText = translateOriginLang(speech, detectedLang)
+                        arduino.write(str.encode(originLangText))      
+                    #   Error handling            
+                    except sr.UnknownValueError:
+                        print("Could not understand audio")
+                        
+                    except sr.RequestError as e:
+                        print("Request error; {0}".format(e))
+
+# ------ MAIN ------ #
+def main():
+    try:
+        while True:
+            #   Set up board, pins and in/outputs
+            gpioInnit()
+            print("Try a controller button")
+            #   Listen for controller button input
+            for event in gamepad.read_loop():
+                if event.type == ecodes.EV_KEY:
+                    if event.value == 1:
+                        print("button pressed")
+                        if event.code == plsBtn:
+                            #   + button pressed -> listen for button input
+                            print("Plus")
+                            listenForButton(True)
+                        if event.code == aBtn:
+                            #   A button pressed -> move right
+                            print("A")
+                            motorRight(1)
+                        elif event.code == bBtn:
+                            #   B button pressed -> move backwards
+                            print("B")
+                            motorReverse(1)
+                        elif event.code == yBtn:
+                            #   Y button pressed -> move left
+                            print("Y")
+                            motorLeft(1)
+                        elif event.code == xBtn:
+                            #   X button pressed -> move forward
+                            print("X")
+                            motorForward(1)
+                        elif event.code == hmBtn:
+                            #   Home button pressed -> stop motors
+                            # Stop motors
+                            print("Stop")
+                            gpio.cleanup()
+            # cleanup pins
+            gpio.cleanup()
+    #   Error handling
+    except KeyboardInterrupt:
+        gpio.cleanup()
+        print("KeyboardInterrupt")
+    except Exception as e:
+        gpio.cleanup()
+        print(e)
+
+if __name__ == "__main__":
+    main()  
