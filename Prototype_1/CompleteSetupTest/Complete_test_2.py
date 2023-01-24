@@ -20,11 +20,13 @@ gpio.setwarnings(False)
 gpio.setmode(gpio.BOARD)
 
 #   Gamepad object
-gamepad = InputDevice('/dev/input/event0')
+gamepad = InputDevice('/dev/input/event1')
 #   Recongizer object
 r = sr.Recognizer()
 #   translator object
 translator = Translator()
+#   Serial port to arduino
+serialPort = serial.Serial("/dev/ttyACM0", baudrate=9600, timeout=1) 
 
 # ------ VARIABLE DECLERATIONS ------ #
 # Language Target 
@@ -57,6 +59,11 @@ zlBtn = 310
 lBtn = 308
 zrBtn = 311
 rBtn = 309
+
+#   base messages to display to user on lcd
+startMessage = "Press the button to start your translation\n\r"
+lightMessage = "Say something when the light is on\n\r"
+
 
 # ------ GPIO INNIT ------ #
 def gpioInnit():
@@ -123,26 +130,37 @@ def motorForward(sec):
     gpio.output(dcMotor_B1B, False)
     time.sleep(sec)
 
+# ------ Arduino ------ #
+def toArduino(message):
+    if serialPort.isOpen():
+        print("{} connected".format(serialPort.port))
+        serialPort.write(str.encode(message))
+        time.sleep(1.5)
+        received = serialPort.readline().decode()
+        print(received)
+        serialPort.flushInput()
+        return True
+    else:
+        print("serial Unavailable")
+
 # ------ Translation ------ #
 #   Get audio from microphone
 def listenToAudio(source):
-    print("Silence please, calibrating...")
-    r.adjust_for_ambient_noise(source, duration=2)
-    print("Say something when the light is on")
-    with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as arduino:
-        arduino.write(str.encode("Say something when the light is on"))
-        time.sleep(2.5)
-    arduino.close()
-    gpio.output(LED, gpio.HIGH)
-    audio = r.listen(source, timeout=5, phrase_time_limit=20)
-    gpio.output(LED, gpio.LOW)
-    return audio
-    
-
+    received = toArduino(lightMessage)
+    if received == True:
+        print("Silence please, calibrating...")
+        r.adjust_for_ambient_noise(source, duration=2)
+        print("Say something when the light is on")
+        gpio.output(LED, gpio.HIGH)
+        audio = r.listen(source, timeout=5, phrase_time_limit=20)
+        gpio.output(LED, gpio.LOW)
+        print("LED OFF")
+        return audio
+  
 #   Translate text to target language and detect origin langauge
 def translateText(speech):    
     translationText = translator.translate(speech, targetLanguage)
-    translationText_String = translationText.new_text
+    translationText_String = translationText.new_text + "\n\r"
     print("Translation text: " + str(translationText.new_text))
     detectedLang = detect(speech)
     print("Detected language: " + str(detectedLang))
@@ -152,23 +170,19 @@ def translateText(speech):
 #   Translate target language to origin language
 def translateOriginLang(speech, detectedLang):
     originLangText = translator.translate(speech, detectedLang)
-    translationText_String = originLangText.new_text
+    translationText_String = originLangText.new_text + "\n\r"
     return translationText_String
 
 # Listen for hardware button
 def listenForButton(listening):
-    #   Show message on arduino to tell user to press button to start
-    with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as arduino:
-        arduino.write(str.encode("Press the button to start"))
-        time.sleep(2.5)
-    arduino.close()
-    #  Listen for button press
-    while listening:
-        if gpio.input(BUTTON) == False:
-            listening = False
-            print("Button to start pressed")
-            # Set up serial port to arduino and microphone source object
-            with serial.Serial("/dev/ttyACM0", baudrate=115200, timeout=1) as arduino:
+    received = toArduino(startMessage)
+    if received == True:
+        while listening:
+            if gpio.input(BUTTON) == True:
+                listening = False
+                print("Button to start pressed")
+                # Set up serial port to arduino and microphone source object
+                # with serialPort  as arduino:
                 with sr.Microphone() as source:
                     try:
                         #   Listen to audio and display what user said on terminal
@@ -178,7 +192,8 @@ def listenForButton(listening):
 
                         #  Translate text to target language and send to arduino for display
                         translationText, detectedLang = translateText(speech)
-                        arduino.write(str.encode(translationText))   
+                        # arduino.write(str.encode(translationText))  
+                        received = toArduino(translationText)
 
                         #   Listen to audio and display what user said on terminal
                         audio = listenToAudio(source)
@@ -187,7 +202,8 @@ def listenForButton(listening):
 
                         #   Translate text to detected language and send to arduino for display
                         originLangText = translateOriginLang(speech, detectedLang)
-                        arduino.write(str.encode(originLangText))      
+                        # arduino.write(str.encode(originLangText))  
+                        received = toArduino(originLangText)
                     #   Error handling            
                     except sr.UnknownValueError:
                         print("Could not understand audio")

@@ -1,7 +1,7 @@
 import serial
 import time
 
-arduino = serial.Serial('COM3', 115200, timeout=.1)
+arduino =serial.Serial("/dev/ttyACM0", baudrate=9600, timeout=1) 
 
 with arduino:
     time.sleep(0.1)
