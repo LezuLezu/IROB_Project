@@ -1,0 +1,44 @@
+# Imports
+    - GPIO
+    - time
+    - pyaudio
+    - speech_recognition
+    - googletrans
+
+# instances
+    - translator
+    - speech_recognizer
+    - gamepad
+
+# variables
+    - Motor pins
+    - button map    
+    - input speech
+    - input text 
+    - translated text
+
+# functions
+    - motor init
+    - motor directions
+        - forward
+        - reverse
+        - left
+        - right
+    - listen to input 
+        - led on
+    - make speech text
+    - translate text 
+    - output text to arduino Uno
+
+# __main__
+    - Listen for button press
+        - Go to listen to input
+        - Go to make speech text
+        - Go to translate text
+        - Go to output text to arduino Uni
+    - Listen for controller input
+        - Go to right function for direction pressed
+
+    
+    
+
