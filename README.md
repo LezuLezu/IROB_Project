@@ -10,3 +10,8 @@ Needed files for your own droid:
 - Prototype_1/Main.py
 - Prototype_1/MAIN_UNO/MAIN_UNO.ino
 - All files in Prototype_1/MAIN_UNO + needed libraries
+
+
+Complete pinout for Droid components
+
+![alt text](https://github.com/LezuLezu/IROB_Project/blob/main/Pinouts/Complete_pinout.png?raw=true)
